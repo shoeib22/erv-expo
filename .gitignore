@@ -1,0 +1,93 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# =========================
+# Next.js
+# =========================
+.next/
+out/
+
+# =========================
+# Build / Production
+# =========================
+build/
+dist/
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+firebase-debug.log*
+
+# =========================
+# Environment files
+# =========================
+.env*
+!.env.example
+
+# =========================
+# OS / Misc
+# =========================
+.DS_Store
+*.pem
+tsc_output.txt
+
+# =========================
+# Vercel
+# =========================
+.vercel
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+next-env.d.ts
+
+# =========================
+# Python / Virtual Envs
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.py
+venv/
+.venv/
+env/
+
+# =========================
+# Testing
+# =========================
+coverage/
+
+# =========================
+# Project-specific
+# =========================
+reproduce_*
+diagnose_firebase.js
+
+# =========================
+# Firebase & App Hosting
+# =========================
+.firebase/
+.firebaserc
+firebase-admin-key.json
+
+# =========================
+# Hardware / IoT (Xerovolt Grid)
+# =========================
+.pio/
+.vscode/.platformio/
+libdeps/service-account.json
