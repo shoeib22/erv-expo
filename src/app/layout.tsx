@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   width: "device-width",
-  initialScale: 1,
-  maximumScale: 1, // Prevents accidental zooming on iPad touch
+  initialScale: 3,
+  maximumScale: 3,
   userScalable: false,
   themeColor: "#050505", // Matches the new dark background
 };
