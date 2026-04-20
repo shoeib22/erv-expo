@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   width: "device-width",
-  initialScale: 3,
-  maximumScale: 3,
-  userScalable: false,
-  themeColor: "#050505", // Matches the new dark background
+  initialScale: 1,
+  maximumScale: 1, // Prevents the browser from allowing any zoom beyond 100%
+  userScalable: false, // Disables pinch-to-zoom gestures
+  viewportFit: "cover", // Ensures the app fills the area behind the iPad "notch" or home bar
 };
 
 export default function RootLayout({
@@ -29,14 +29,13 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Added Playfair Display for that "Old Money" serif touch in headings if needed */}
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;1,400&display=swap"
           rel="stylesheet"
         />
       </head>
       <body
-        className="antialiased bg-[#050505] text-neutral-200 min-h-screen selection:bg-blue-500/30 overflow-hidden"
+        className="antialiased bg-[#050505] text-neutral-200 min-h-screen selection:bg-blue-500/30 overflow-hidden touch-none"
         suppressHydrationWarning
       >
         {/* Subtle noise texture overlay for a premium physical feel */}
