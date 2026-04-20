@@ -11,10 +11,15 @@ const ACCESS_SECRET     = process.env.TUYA_ACCESS_SECRET ?? "";
 const BASE_URL          = process.env.TUYA_BASE_URL     ?? "https://openapi.tuyain.com";
 
 // ─── DPS mapping ──────────────────────────────────────────────────────────────
+// lib/tuya.ts
 export const DPS = {
-  POWER:     "switch",
-  MODE:      "mode",
+  POWER: "switch",
+  MODE: "mode",
   FAN_SPEED: "fan_speed",
+  ANION: "anion",
+  LIGHT: "light",
+  CO2: "co2_value",
+  TEMP: "temp_current"
 } as const;
 
 // ─── Token cache ──────────────────────────────────────────────────────────────

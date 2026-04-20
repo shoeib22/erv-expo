@@ -23,7 +23,7 @@ export function StatusPanel({ state, syncing, error }: StatusPanelProps) {
     },
     {
       label: "Fan",
-      value: `${state.fanSpeed}%`,
+      value: `${state.fanSpeed}`,
       accent: false,
     },
   ];

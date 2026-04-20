@@ -4,10 +4,9 @@ import clsx from "clsx";
 import type { DeviceMode } from "@/lib/types";
 
 const MODES: { value: DeviceMode; label: string }[] = [
-  { value: "auto", label: "Auto" },
-  { value: "sleep", label: "Sleep" },
-  { value: "boost", label: "Boost" },
-  { value: "manual", label: "Manual" },
+  { value: "Supply", label: "Supply" },
+  { value: "exhaust", label: "Exhaust" },
+  { value: "ventilate", label: "Heat Recovery" },
 ];
 
 interface ModeSelectorProps {

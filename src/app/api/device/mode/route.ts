@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendCommand, DPS } from "@/lib/tuya";
 import type { DeviceMode } from "@/lib/types";
 
-const VALID_MODES: DeviceMode[] = ["auto", "sleep", "boost", "manual"];
+const VALID_MODES: DeviceMode[] = ["Supply", "exhaust", "ventilate"];
 
 export async function POST(req: NextRequest) {
   try {

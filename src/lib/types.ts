@@ -3,13 +3,15 @@
  */
 
 // Define the operational modes supported by the ERV hardware
-export type DeviceMode = "auto" | "manual" | "sleep" | "boost";
+export type DeviceMode =  "Supply" | "exhaust" | "ventilate";
 
 // Define the core state structure for the device
 export interface DeviceState {
   power: boolean;
   mode: DeviceMode;
-  fanSpeed: number; // Represents percentage (0-100)
+  fanSpeed: 1 | 2 | 3; // Represents fan speed levels
+  anion: boolean;
+  light: boolean;
 }
 
 // Standardized structure for API responses

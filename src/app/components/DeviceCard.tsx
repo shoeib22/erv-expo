@@ -6,6 +6,8 @@ import { ModeSelector } from "./ModeSelector";
 import { FanSlider } from "./FanSlider";
 import { StatusPanel } from "./StatusPanel";
 import { useDevice } from "../hooks/useDevice";
+// If you use an icon library like lucide-react, it fits this design well
+import { Lightbulb } from "lucide-react"; 
 
 function LoadingSkeleton() {
   return (
@@ -33,6 +35,7 @@ export function DeviceCard() {
     togglePower,
     setMode,
     setFanSpeed,
+    toggleLight, // Added from hook
   } = useDevice();
 
   if (loading) return <LoadingSkeleton />;
@@ -40,7 +43,7 @@ export function DeviceCard() {
   return (
     <div
       className={clsx(
-        "relative w-full max-w-sm flex flex-col items-center gap-8",
+        "relative w-full max-w-sm flex flex-col items-center gap-7", // Slightly reduced gap to accommodate new row
         "bg-[#171a21] rounded-[2.5rem] px-8 py-9",
         "border border-white/5",
         "shadow-[0_20px_60px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.03)]",
@@ -90,16 +93,13 @@ export function DeviceCard() {
       </div>
 
       {/* Power */}
-      <div className="my-2">
+      <div className="my-1">
         <PowerButton
           isOn={state.power}
           onClick={togglePower}
           disabled={syncing}
         />
       </div>
-
-      {/* Divider */}
-      <div className="w-full h-px bg-white/5" />
 
       {/* Mode */}
       <div className="w-full flex flex-col gap-3">
@@ -116,10 +116,36 @@ export function DeviceCard() {
       {/* Fan */}
       <div className="w-full">
         <FanSlider
-          value={state.fanSpeed}
+          value={state.fanSpeed as 1 | 2 | 3} 
           onChange={setFanSpeed}
           disabled={!state.power || syncing}
         />
+      </div>
+
+      {/* Lights Toggle Section */}
+      <div className="w-full flex flex-col gap-3">
+        <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-gray-500">
+          Accessories
+        </p>
+        <button
+          onClick={toggleLight}
+          disabled={!state.power || syncing}
+          className={clsx(
+            "flex items-center justify-between w-full p-4 rounded-2xl border transition-all duration-300",
+            state.light 
+              ? "bg-yellow-400/10 border-yellow-400/20 text-yellow-200 shadow-[0_0_15px_rgba(234,179,8,0.1)]" 
+              : "bg-white/5 border-white/5 text-gray-500 hover:bg-white/10"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Lightbulb size={18} className={state.light ? "text-yellow-400" : "text-gray-600"} />
+            <span className="text-sm font-medium">Internal Light</span>
+          </div>
+          <div className={clsx(
+            "w-2 h-2 rounded-full",
+            state.light ? "bg-yellow-400 shadow-[0_0_8px_rgba(234,179,8,0.8)]" : "bg-gray-700"
+          )} />
+        </button>
       </div>
 
       {/* Divider */}

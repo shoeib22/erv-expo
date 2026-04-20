@@ -7,8 +7,10 @@ const POLL_INTERVAL = 4000; // ms
 
 const DEFAULT_STATE: DeviceState = {
   power: false,
-  mode: "auto",
-  fanSpeed: 50,
+  mode: "Supply",
+  fanSpeed: 1,
+  anion: false,
+  light: true,
 };
 
 export function useDevice() {
@@ -50,7 +52,6 @@ export function useDevice() {
       payload: Record<string, unknown>,
       optimisticUpdate: Partial<DeviceState>
     ) => {
-      // FIX: Explicitly type 'prev' to DeviceState to resolve error 7006
       setState((prev: DeviceState) => ({ ...prev, ...optimisticUpdate }));
       setSyncing(true);
       try {
@@ -89,11 +90,23 @@ export function useDevice() {
   );
 
   const setFanSpeed = useCallback(
-    (fanSpeed: number) => {
+    (fanSpeed: 1 | 2 | 3) => {
       sendCommand("/api/device/fan", { value: fanSpeed }, { fanSpeed });
     },
     [sendCommand]
   );
+
+  // --- New Accessory Handlers ---
+
+  const toggleLight = useCallback(() => {
+    const newValue = !state.light;
+    sendCommand("/api/device/light", { value: newValue }, { light: newValue });
+  }, [state.light, sendCommand]);
+
+  const toggleAnion = useCallback(() => {
+    const newValue = !state.anion;
+    sendCommand("/api/device/anion", { value: newValue }, { anion: newValue });
+  }, [state.anion, sendCommand]);
 
   return {
     state,
@@ -103,6 +116,8 @@ export function useDevice() {
     togglePower,
     setMode,
     setFanSpeed,
+    toggleLight, // Added
+    toggleAnion, // Added
     refresh: () => fetchState(true),
   };
 }
