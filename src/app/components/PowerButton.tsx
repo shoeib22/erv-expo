@@ -75,7 +75,7 @@ export function PowerButton({ isOn, onClick, disabled }: PowerButtonProps) {
           width="40"
           height="40"
           viewBox="0 0 24 24"
-          fill="none"
+          fill="none" 
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={1.6}
