@@ -11,6 +11,11 @@ const DEFAULT_STATE: DeviceState = {
   fanSpeed: 1,
   anion: false,
   light: true,
+  powerful: false,
+  co2Value: 0,
+  co2Threshold: 1000,
+  co2Switch: false,
+  freeCooling: false,
 };
 
 export function useDevice() {
@@ -107,6 +112,24 @@ export function useDevice() {
     const newValue = !state.anion;
     sendCommand("/api/device/anion", { value: newValue }, { anion: newValue });
   }, [state.anion, sendCommand]);
+  const togglePowerful = useCallback(() => {
+  const newValue = !state.powerful;
+  sendCommand("/api/device/powerful", { value: newValue }, { powerful: newValue });
+}, [state.powerful, sendCommand]);
+const toggleCo2Switch = useCallback(() => {
+  const newValue = !state.co2Switch;
+  sendCommand("/api/device/co2-switch", { value: newValue }, { co2Switch: newValue });
+}, [state.co2Switch, sendCommand]);
+
+const setCo2Threshold = useCallback((value: number) => {
+  sendCommand("/api/device/co2-threshold", { value }, { co2Threshold: value });
+}, [sendCommand]);
+
+const toggleFreeCooling = useCallback(() => {
+  const newValue = !state.freeCooling;
+  sendCommand("/api/device/free-cooling", { value: newValue }, { freeCooling: newValue });
+}, [state.freeCooling, sendCommand]);
+
 
   return {
     state,
@@ -118,6 +141,10 @@ export function useDevice() {
     setFanSpeed,
     toggleLight, // Added
     toggleAnion, // Added
+    togglePowerful, // Added
+    toggleCo2Switch,  // ← add
+    setCo2Threshold,  // ← add
+    toggleFreeCooling, // ← add
     refresh: () => fetchState(true),
   };
 }

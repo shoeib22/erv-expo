@@ -5,21 +5,24 @@
 import { createHash, createHmac } from "crypto";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-export const DEVICE_ID  = process.env.TUYA_DEVICE_ID    ?? "";
-const ACCESS_ID         = process.env.TUYA_ACCESS_ID    ?? "";
-const ACCESS_SECRET     = process.env.TUYA_ACCESS_SECRET ?? "";
-const BASE_URL          = process.env.TUYA_BASE_URL     ?? "https://openapi.tuyain.com";
+export const DEVICE_ID   = process.env.TUYA_DEVICE_ID     ?? "";
+const ACCESS_ID          = process.env.TUYA_ACCESS_ID     ?? "";
+const ACCESS_SECRET      = process.env.TUYA_ACCESS_SECRET ?? "";
+const BASE_URL           = process.env.TUYA_BASE_URL      ?? "https://openapi.tuyain.com";
 
-// ─── DPS mapping ──────────────────────────────────────────────────────────────
-// lib/tuya.ts
+// ─── DPS mapping ─────────────────────────────────────────────────────────────
 export const DPS = {
-  POWER: "switch",
-  MODE: "mode",
+  POWER:     "switch",
+  MODE:      "mode",
   FAN_SPEED: "fan_speed",
-  ANION: "anion",
-  LIGHT: "light",
-  CO2: "co2_value",
-  TEMP: "temp_current"
+  ANION:     "anion",
+  LIGHT:     "light",
+  CO2:       "co2_value",
+  TEMP:      "temp_current",
+  POWERFUL:  "powerful",
+  CO2_THRESHOLD: "co2_threshold",
+  CO2_SWITCH:    "co2_switch",
+  FREE_COOLING:  "free_cooling",
 } as const;
 
 // ─── Token cache ──────────────────────────────────────────────────────────────
@@ -65,23 +68,19 @@ function buildSignHeaders(
   };
 }
 
-// ─── Token fetch (FIXED: includes query in signature) ─────────────────────────
+// ─── Token fetch ──────────────────────────────────────────────────────────────
 
 async function getAccessToken(): Promise<string> {
   if (_tokenCache && Date.now() < _tokenCache.expireAt - 60_000) {
     return _tokenCache.accessToken;
   }
 
-  const path = "/v1.0/token";
-  const query = { grant_type: "1" };
-
-  const qs = "?" + new URLSearchParams(query).toString();
+  const path     = "/v1.0/token";
+  const qs       = "?grant_type=1";
   const signPath = path + qs;
+  const headers  = buildSignHeaders("GET", signPath, "");
 
-  const headers = buildSignHeaders("GET", signPath, "");
-
-  const res = await fetch(`${BASE_URL}${signPath}`, { headers });
-
+  const res  = await fetch(`${BASE_URL}${signPath}`, { headers });
   const json = await res.json() as {
     success: boolean;
     result?: { access_token: string; expire_time: number };
@@ -100,7 +99,7 @@ async function getAccessToken(): Promise<string> {
   return _tokenCache.accessToken;
 }
 
-// ─── Generic request (UPDATED: query support) ─────────────────────────────────
+// ─── Generic request ──────────────────────────────────────────────────────────
 
 async function tuyaRequest<T>(
   method: "GET" | "POST",
@@ -108,22 +107,17 @@ async function tuyaRequest<T>(
   query?: Record<string, string>,
   body?: Record<string, unknown>
 ): Promise<T> {
-  if (!ACCESS_ID || !ACCESS_SECRET) {
-    throw new Error("Missing TUYA_ACCESS_ID or TUYA_ACCESS_SECRET");
-  }
-  if (!DEVICE_ID) {
-    throw new Error("Missing TUYA_DEVICE_ID");
-  }
+  if (!ACCESS_ID || !ACCESS_SECRET) throw new Error("Missing TUYA_ACCESS_ID or TUYA_ACCESS_SECRET");
+  if (!DEVICE_ID)                   throw new Error("Missing TUYA_DEVICE_ID");
 
   const token   = await getAccessToken();
   const bodyStr = body ? JSON.stringify(body) : "";
-
-  const qs = query ? "?" + new URLSearchParams(query).toString() : "";
+  const qs      = query ? "?" + new URLSearchParams(query).toString() : "";
   const signPath = path + qs;
 
   const headers = buildSignHeaders(method, signPath, bodyStr, token);
 
-  const res = await fetch(`${BASE_URL}${path}${qs}`, {
+  const res  = await fetch(`${BASE_URL}${path}${qs}`, {
     method,
     headers,
     ...(body ? { body: bodyStr } : {}),
@@ -136,13 +130,11 @@ async function tuyaRequest<T>(
   };
 
   console.log(
-  `[Tuya] ${method} ${signPath} → success:${json.success}`,
-  !json.success ? { code: json.code, msg: json.msg } : ""
-);
+    `[Tuya] ${method} ${signPath} → success:${json.success}`,
+    !json.success ? { code: json.code, msg: json.msg } : ""
+  );
 
-  if (!json.success) {
-    throw new Error(`${json.msg ?? "unknown"}`);
-  }
+  if (!json.success) throw new Error(json.msg ?? "unknown");
 
   return json.result;
 }
@@ -150,34 +142,26 @@ async function tuyaRequest<T>(
 // ─── Device Status ────────────────────────────────────────────────────────────
 
 export async function fetchDeviceStatus() {
-  // Attempt 1: Spatial
+  // Attempt 1: Spatial API
   try {
-    const path = `/v2.0/cloud/thing/${DEVICE_ID}/shadow/properties`;
-
     const raw = await tuyaRequest<{
       properties: { code: string; value: unknown }[];
-    }>("GET", path);
+    }>("GET", `/v2.0/cloud/thing/${DEVICE_ID}/shadow/properties`);
 
     const dps: Record<string, unknown> = {};
     for (const p of raw.properties ?? []) dps[p.code] = p.value;
-
     return parseDps(dps);
   } catch (e1) {
-    console.log(`[Tuya] Spatial failed, fallback →`, e1);
+    console.log("[Tuya] Spatial status failed, fallback →", e1);
   }
 
-  // Attempt 2: Smart Home
+  // Attempt 2: Smart Home API
   try {
     type DpItem = { code: string; value: unknown };
-
-    const result = await tuyaRequest<DpItem[]>(
-      "GET",
-      `/v1.0/devices/${DEVICE_ID}/status`
-    );
+    const result = await tuyaRequest<DpItem[]>("GET", `/v1.0/devices/${DEVICE_ID}/status`);
 
     const dps: Record<string, unknown> = {};
     for (const item of result) dps[item.code] = item.value;
-
     return parseDps(dps);
   } catch (e2) {
     throw new Error(e2 instanceof Error ? e2.message : String(e2));
@@ -188,13 +172,21 @@ export async function fetchDeviceStatus() {
 
 function parseDps(dps: Record<string, unknown>) {
   return {
-    power:    (dps[DPS.POWER]     ?? false) as boolean,
-    mode:     (dps[DPS.MODE]      ?? "auto") as string,
-    fanSpeed: (dps[DPS.FAN_SPEED] ?? 50)    as number,
+    power:    (dps[DPS.POWER]     ?? false)    as boolean,
+    mode:     (dps[DPS.MODE]      ?? "Supply") as string,
+    fanSpeed: (dps[DPS.FAN_SPEED] ?? 1)        as number,
+    anion:    (dps[DPS.ANION]     ?? false)    as boolean,
+    light:    (dps[DPS.LIGHT]     ?? false)    as boolean,
+    powerful: (dps[DPS.POWERFUL] ?? false) as boolean,
+    co2Value:     (dps[DPS.CO2]           ?? 0)     as number,
+    co2Threshold: (dps[DPS.CO2_THRESHOLD] ?? 1000)  as number,
+    co2Switch:    (dps[DPS.CO2_SWITCH]    ?? false)  as boolean,
+    freeCooling:  (dps[DPS.FREE_COOLING]  ?? false)  as boolean,
   };
 }
 
-// ─── Send Command ─────────────────────────────────────────────────────────────
+// ─── Send Command (properties — for power, mode, fan speed) ──────────────────
+// Uses /shadow/properties/issue — works for standard writable properties.
 
 export async function sendCommand(commands: { code: string; value: unknown }[]) {
   // Attempt 1: Spatial
@@ -209,7 +201,7 @@ export async function sendCommand(commands: { code: string; value: unknown }[]) 
       { properties }
     );
   } catch (e1) {
-    console.log(`[Tuya] Spatial command failed → fallback`, e1);
+    console.log("[Tuya] Spatial properties/issue failed → fallback", e1);
   }
 
   // Attempt 2: Smart Home
@@ -218,5 +210,23 @@ export async function sendCommand(commands: { code: string; value: unknown }[]) 
     `/v1.0/devices/${DEVICE_ID}/commands`,
     undefined,
     { commands }
+  );
+}
+
+// ─── Send Action (for boolean accessory DPs — light, anion) ──────────────────
+// Uses /shadow/actions — matches what Tuya's debug panel uses for these DPs.
+
+export async function sendAction(code: string, value: unknown) {
+  // This device doesn't support /shadow/actions (501 error)
+  // Use /shadow/properties/issue instead — same endpoint as sendCommand
+  return tuyaRequest(
+    "POST",
+    `/v2.0/cloud/thing/${DEVICE_ID}/shadow/properties/issue`,
+    undefined,
+    {
+      properties: {
+        [code]: value, // e.g. { light: true }
+      },
+    }
   );
 }

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { sendCommand } from "@/lib/tuya";
+import { sendAction } from "@/lib/tuya";
 
 export async function POST(req: Request) {
   try {
     const { value } = await req.json();
 
-    await sendCommand([{ code: "anion", value: !!value }]);
+    await sendAction("light", !!value);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

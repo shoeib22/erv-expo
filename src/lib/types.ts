@@ -9,9 +9,14 @@ export type DeviceMode =  "Supply" | "exhaust" | "ventilate";
 export interface DeviceState {
   power: boolean;
   mode: DeviceMode;
-  fanSpeed: 1 | 2 | 3; // Represents fan speed levels
+  fanSpeed: 1 | 2 | 3; 
   anion: boolean;
   light: boolean;
+  powerful: boolean; 
+  co2Value: number;       
+  co2Threshold: number;   
+  co2Switch: boolean;   
+  freeCooling: boolean;
 }
 
 // Standardized structure for API responses

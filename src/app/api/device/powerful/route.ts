@@ -4,9 +4,7 @@ import { sendCommand } from "@/lib/tuya";
 export async function POST(req: Request) {
   try {
     const { value } = await req.json();
-
-    await sendCommand([{ code: "anion", value: !!value }]);
-
+    await sendCommand([{ code: "powerful", value: !!value }]);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(
