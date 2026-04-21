@@ -16,6 +16,8 @@ const DEFAULT_STATE: DeviceState = {
   co2Threshold: 1000,
   co2Switch: false,
   freeCooling: false,
+  countdownSet: "cancel",
+  countdownLeft: 0,
 };
 
 export function useDevice() {
@@ -129,6 +131,9 @@ const toggleFreeCooling = useCallback(() => {
   const newValue = !state.freeCooling;
   sendCommand("/api/device/free-cooling", { value: newValue }, { freeCooling: newValue });
 }, [state.freeCooling, sendCommand]);
+const setCountdown = useCallback((value: DeviceState["countdownSet"]) => {
+  sendCommand("/api/device/countdown", { value }, { countdownSet: value });
+}, [sendCommand]);
 
 
   return {
@@ -139,12 +144,13 @@ const toggleFreeCooling = useCallback(() => {
     togglePower,
     setMode,
     setFanSpeed,
-    toggleLight, // Added
-    toggleAnion, // Added
-    togglePowerful, // Added
-    toggleCo2Switch,  // ← add
-    setCo2Threshold,  // ← add
-    toggleFreeCooling, // ← add
+    toggleLight, 
+    toggleAnion, 
+    togglePowerful, 
+    toggleCo2Switch,  
+    setCo2Threshold,  
+    toggleFreeCooling, 
+    setCountdown, 
     refresh: () => fetchState(true),
   };
 }

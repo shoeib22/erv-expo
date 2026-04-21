@@ -23,6 +23,8 @@ export const DPS = {
   CO2_THRESHOLD: "co2_threshold",
   CO2_SWITCH:    "co2_switch",
   FREE_COOLING:  "free_cooling",
+  COUNTDOWN_SET: "countdown_set",
+  COUNTDOWN_LEFT: "countdown_left"
 } as const;
 
 // ─── Token cache ──────────────────────────────────────────────────────────────
@@ -182,6 +184,8 @@ function parseDps(dps: Record<string, unknown>) {
     co2Threshold: (dps[DPS.CO2_THRESHOLD] ?? 1000)  as number,
     co2Switch:    (dps[DPS.CO2_SWITCH]    ?? false)  as boolean,
     freeCooling:  (dps[DPS.FREE_COOLING]  ?? false)  as boolean,
+    countdownSet: (dps[DPS.COUNTDOWN_SET] ?? "cancel") as "cancel" | "1h" | "2h" | "3h" | "4h" | "5h" | "6h",
+    countdownLeft: (dps[DPS.COUNTDOWN_LEFT] ?? 0)         as number,
   };
 }
 

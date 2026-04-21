@@ -17,6 +17,8 @@ export interface DeviceState {
   co2Threshold: number;   
   co2Switch: boolean;   
   freeCooling: boolean;
+  countdownSet: "cancel" | "1h" | "2h" | "3h" | "4h" | "5h" | "6h";
+  countdownLeft: number;
 }
 
 // Standardized structure for API responses
